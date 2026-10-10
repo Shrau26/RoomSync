@@ -1,0 +1,29 @@
+{
+  "dataset": {
+    "n_profiles": 2000,
+    "n_pairs": 8000,
+    "personality_model": "Big Five OCEAN - IPIP-NEO standard",
+    "archetypes": [
+      "studious_introvert",
+      "social_extrovert",
+      "relaxed_flexible",
+      "anxious_hardworker",
+      "creative_open"
+    ]
+  },
+  "fine_tuning": {
+    "augmented_profiles": 500,
+    "total_pairs": 8000,
+    "stratified_split": true
+  },
+  "random_forest": {
+    "n_estimators": 300,
+    "max_depth": 18,
+    "classifier_accuracy": 0.8969,
+    "regressor_mae": 2.678
+  },
+  "clustering": {
+    "best_k": 3,
+    "silhouette": 0.1327
+  }
+}

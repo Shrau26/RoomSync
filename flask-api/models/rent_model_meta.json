@@ -1,0 +1,168 @@
+{
+  "model": "RandomForestRegressor",
+  "n_estimators": 200,
+  "features": {
+    "categorical": [
+      "city",
+      "room_type",
+      "furnishing",
+      "floor"
+    ],
+    "numerical": [
+      "city_tier",
+      "year",
+      "area_mult"
+    ]
+  },
+  "cities": [
+    "Mumbai",
+    "Delhi",
+    "Bengaluru",
+    "Hyderabad",
+    "Chennai",
+    "Kolkata",
+    "Pune",
+    "Ahmedabad",
+    "Gurugram",
+    "Noida",
+    "Jaipur",
+    "Chandigarh",
+    "Faridabad",
+    "Ghaziabad",
+    "Panaji",
+    "Indore",
+    "Lucknow",
+    "Kochi",
+    "Nagpur",
+    "Bhopal",
+    "Surat",
+    "Nashik",
+    "Coimbatore",
+    "Visakhapatnam",
+    "Mysuru",
+    "Mangaluru",
+    "Vijayawada",
+    "Thiruvananthapuram",
+    "Patna",
+    "Varanasi",
+    "Dehradun",
+    "Warangal"
+  ],
+  "room_types": [
+    "1RK",
+    "1BHK",
+    "2BHK",
+    "3BHK",
+    "PG"
+  ],
+  "furnishings": [
+    "Unfurnished",
+    "Semi-Furnished",
+    "Fully Furnished"
+  ],
+  "floors": [
+    "Ground",
+    "1st-2nd",
+    "3rd-5th",
+    "6th+"
+  ],
+  "years": [
+    2022,
+    2023,
+    2024,
+    2025,
+    2026
+  ],
+  "city_tiers": {
+    "Mumbai": 1,
+    "Delhi": 1,
+    "Bengaluru": 1,
+    "Hyderabad": 1,
+    "Chennai": 1,
+    "Kolkata": 1,
+    "Pune": 2,
+    "Ahmedabad": 2,
+    "Gurugram": 2,
+    "Noida": 2,
+    "Jaipur": 2,
+    "Chandigarh": 2,
+    "Faridabad": 2,
+    "Ghaziabad": 2,
+    "Panaji": 2,
+    "Indore": 3,
+    "Lucknow": 3,
+    "Kochi": 3,
+    "Nagpur": 3,
+    "Bhopal": 3,
+    "Surat": 3,
+    "Nashik": 3,
+    "Coimbatore": 3,
+    "Visakhapatnam": 3,
+    "Mysuru": 3,
+    "Mangaluru": 3,
+    "Vijayawada": 3,
+    "Thiruvananthapuram": 3,
+    "Patna": 4,
+    "Varanasi": 4,
+    "Dehradun": 4,
+    "Warangal": 4
+  },
+  "city_bases": {
+    "Mumbai": 14000,
+    "Delhi": 9000,
+    "Bengaluru": 8500,
+    "Hyderabad": 6500,
+    "Chennai": 7500,
+    "Kolkata": 6000,
+    "Pune": 5500,
+    "Ahmedabad": 6000,
+    "Gurugram": 10000,
+    "Noida": 8000,
+    "Jaipur": 5000,
+    "Chandigarh": 7000,
+    "Faridabad": 6000,
+    "Ghaziabad": 6500,
+    "Panaji": 8000,
+    "Indore": 5000,
+    "Lucknow": 5500,
+    "Kochi": 6500,
+    "Nagpur": 4000,
+    "Bhopal": 4500,
+    "Surat": 5500,
+    "Nashik": 4200,
+    "Coimbatore": 5000,
+    "Visakhapatnam": 5500,
+    "Mysuru": 4000,
+    "Mangaluru": 4500,
+    "Vijayawada": 5000,
+    "Thiruvananthapuram": 5500,
+    "Patna": 4500,
+    "Varanasi": 4000,
+    "Dehradun": 5500,
+    "Warangal": 3000
+  },
+  "area_ranges": {
+    "1": [
+      0.75,
+      2.5
+    ],
+    "2": [
+      0.8,
+      1.8
+    ],
+    "3": [
+      0.82,
+      1.5
+    ],
+    "4": [
+      0.85,
+      1.35
+    ]
+  },
+  "metrics": {
+    "mae": 2069.65,
+    "r2": 0.9555,
+    "n_train": 6400,
+    "n_test": 1600
+  }
+}

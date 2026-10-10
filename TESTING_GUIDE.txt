@@ -1,0 +1,239 @@
+╔══════════════════════════════════════════════════════════════╗
+║           ROOMSYNC — COMPLETE TESTING GUIDE                 ║
+╚══════════════════════════════════════════════════════════════╝
+
+Before testing ANYTHING — make sure all 3 servers are running:
+  Terminal 1: cd flask-api    → python app.py       (port 5001)
+  Terminal 2: cd backend      → npm run dev          (port 4000)
+  Terminal 3: cd roomsync     → npm run dev          (port 3000)
+  Open browser: http://localhost:3000
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TEST 1 — SIGNUP & LOGIN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Steps:
+  1. Open http://localhost:3000
+  2. Click "Sign Up"
+  3. Enter name, email, password → Submit
+  4. Should redirect to Dashboard
+
+✅ PASS: Dashboard loads with your name
+❌ FAIL: Error shown → Check Firebase config in src/firebase/config.js
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TEST 2 — PROFILE SAVE (with photo)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Steps:
+  1. Click "My Profile" in sidebar
+  2. Fill: Name, College, Year (click FY/SY/TY), Budget min/max
+  3. Click Lifestyle tab → select Sleep, Study, Diet options
+  4. Click Big Five tab → move all 5 sliders
+  5. Select your role (Looking for Room / Have a Room / etc)
+  6. Click camera icon → pick any photo from your computer
+  7. Click "Save Profile"
+
+✅ PASS: Green toast "Profile saved successfully!"
+❌ FAIL "permission-denied" → Fix Firestore rules (paste rules from Firebase Console)
+❌ FAIL photo not saving → Configure Cloudinary (src/pages/ProfilePage.jsx line: const CLOUD)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TEST 3 — ADD ROOM LISTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Steps:
+  1. Click "Add Listing" in sidebar
+  2. Fill Title, Location, Price
+  3. Select Room Type (click Single Room / PG / etc)
+  4. Select at least 3 facilities
+  5. Click photo box → select 2-3 room photos
+  6. Click "Submit Listing"
+
+✅ PASS: Green checkmark screen → "Listing Added!" → redirects to Browse Rooms
+❌ FAIL loading forever → Check browser Console (F12) for error message
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TEST 4 — BROWSE ROOMS (images + details)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Steps:
+  1. Click "Browse Rooms"
+  2. You should see 6 demo room cards with photos
+  3. Click "View Details" on any card
+  4. Modal should open with: full photo, description, all facilities, owner name, contact buttons
+  5. If room has multiple photos → you should see thumbnail gallery below main photo
+  6. Test search: type "Dadar" in search box → only Dadar room shows
+  7. Test price filter: type 5000 in Min, 10000 in Max → only rooms in that range show
+  8. Click "Filters" button → select "WiFi" → only rooms with WiFi show
+  9. Click "Map" button → map with price markers appears (needs internet)
+  10. Click a price marker on map → room detail modal opens
+
+✅ PASS: Photos show, modal opens with full details, filters work
+❌ FAIL map not showing → Check internet connection (Leaflet loads from CDN)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TEST 5 — ROOMMATE AI MATCHING (ML model)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FIRST complete Profile (Test 2) or matching won't work.
+
+Steps:
+  1. Make sure Flask is running: python flask-api/app.py
+  2. Check Flask health: open http://localhost:5001/api/health in browser
+     Should show: {"ml_loaded": true, "status": "ok"}
+  3. Click "Roommate Match AI" in sidebar
+  4. Select Schedule, Smoking, Guests preferences
+  5. Click "Find My Matches"
+  6. Should show 10 matched profiles with % compatibility
+
+✅ PASS: 10 matches with compatibility scores appear
+❌ FAIL "0 matches" → Flask not running. Start: python flask-api/app.py
+❌ FAIL "ML Error: float() argument..." → Restart Flask after fixing profile
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TEST 6 — REAL-TIME CHAT (2 laptops test)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REQUIRES: Firebase configured in src/firebase/config.js
+
+── Single laptop test first ────────────────────────────────
+  1. Open http://localhost:3000 in Chrome (normal window)
+  2. Open http://localhost:3000 in Chrome (Incognito window → Ctrl+Shift+N)
+  3. Login as User A in normal window
+  4. Login as User B in incognito window
+  5. In User A window → Browse Rooms → click "Contact" on any room
+  6. Chat page opens for User A with owner contact
+  7. Type "Hello!" and press Enter
+
+  CHECK: Does "Hello!" appear instantly in User B's incognito window
+         (without User B refreshing the page)?
+
+✅ PASS: Message appears on both sides within 1-2 seconds → Firebase real-time working!
+❌ FAIL message only shows on sender side → Firebase config wrong or Firestore rules missing
+
+── Two laptop test ─────────────────────────────────────────
+  1. On Laptop 1 — make sure app is running: npm run dev
+  2. On Laptop 2 — open browser → go to: http://YOUR_LAPTOP1_IP:3000
+     (find your IP: open cmd → type ipconfig → look for IPv4 Address e.g. 192.168.1.5)
+     So Laptop 2 opens: http://192.168.1.5:3000
+  3. Both laptops must be on SAME WiFi network
+  4. Login as different users on each laptop
+  5. Start a chat between them
+
+  If "http://192.168.1.5:3000" doesn't open on Laptop 2:
+  Stop the app on Laptop 1, then run:
+    npm run dev -- --host
+  Now Laptop 2 can access it.
+
+✅ PASS: Message typed on Laptop 1 appears on Laptop 2 within 1 second
+❌ FAIL can't connect → both must be on same WiFi
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TEST 7 — VISIT SCHEDULER + EMAIL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Steps:
+  1. Click "Visit Scheduler" in sidebar
+  2. Click "Schedule Visit"
+  3. Fill: Room Title, Date (any future date), Time
+  4. Fill owner email: YOUR OWN EMAIL (to test if email arrives)
+  5. Click "Schedule Visit & Send Notifications"
+
+✅ PASS toast: "Visit scheduled!" → check email inbox (may take 2 min)
+  Without EmailJS setup → toast still shows "Visit scheduled!" but no email
+
+To enable real emails:
+  1. Open src/services/emailService.js
+  2. Follow the 5 steps at the top of that file
+  3. Set ENABLED = true
+  4. Save → app reloads → test again → check inbox
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TEST 8 — EXPENSE ESTIMATOR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Steps:
+  1. Click "Expense Estimator"
+  2. Select city: Mumbai
+  3. Type distance to college: 5 (km)
+  4. Travel field should auto-fill (5 × 2 × 25 × 5 = Rs.1250)
+  5. Fill Rent: 8000, Mess: 3000, Electricity: 500
+  6. Total shows on right side with breakdown bars
+  7. Budget advice shows (Budget-Friendly / Moderate / High)
+
+✅ PASS: Total updates live, bars show correctly, travel auto-calculated
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TEST 9 — OWNER DASHBOARD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Steps:
+  1. Click "Owner Dashboard" in sidebar
+  2. Should see 3 tabs: My Listings, Visit Requests, Inquiries
+  3. Click "Visit Requests" → 2 demo visits should show
+  4. Click "Confirm" on a pending visit → status changes to "Confirmed"
+  5. Click "Add New Listing" button → goes to Add Listing page
+
+✅ PASS: Tabs work, confirm button works, stats show at top
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TEST 10 — REFERRAL SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Steps:
+  1. Click "Earn via Referral"
+  2. Your unique code shows (ROOM + first 6 chars of your UID)
+  3. Click "Copy" → code copies to clipboard (paste in Notepad to verify)
+  4. Click "Share" → browser share dialog opens (on mobile) or copies link
+  5. Referral history shows below
+
+✅ PASS: Code is unique per user, copy works
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+QUICK DIAGNOSTIC — CHECK ALL AT ONCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Open browser → press F12 → click Console tab
+
+After loading the app, check for these messages:
+  ✅ No red errors = everything loaded fine
+  🟡 Yellow warnings = minor issues, app still works
+  🔴 Red errors = something needs fixing
+
+Common red errors and fixes:
+  "Firebase: Error (auth/invalid-api-key)"
+    → Firebase config wrong in src/firebase/config.js
+
+  "Missing or insufficient permissions"
+    → Firestore rules not set. Go to Firebase Console → Rules → paste correct rules
+
+  "Cannot read properties of undefined (reading 'uid')"
+    → Not logged in. Login first before testing features
+
+  "Failed to fetch" on Roommate Match
+    → Flask not running. Run: python flask-api/app.py
+
+  "net::ERR_CONNECTION_REFUSED localhost:5001"
+    → Flask not running
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SUMMARY TABLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Feature                 | Needs Firebase | Needs Flask | Needs EmailJS
+─────────────────────────┼────────────────┼─────────────┼──────────────
+Signup / Login          |      YES       |     NO      |     NO
+Profile Save            |      YES       |     NO      |     NO
+Add Room Listing        |      YES       |     NO      |     NO
+Browse Rooms            |      YES       |     NO      |     NO
+Real-Time Chat          |      YES       |     NO      |     NO
+Roommate AI Match       |       NO       |     YES     |     NO
+Visit Scheduler         |      YES       |     NO      |     NO
+Email Notifications     |       NO       |     NO      |     YES
+Expense Estimator       |       NO       |     NO      |     NO
+Owner Dashboard         |      YES       |     NO      |     NO
+Referral System         |      YES       |     NO      |     NO
+Map View (Browse)       |       NO       |     NO      |     NO
+
+Works without any setup (demo mode):
+  Browse Rooms, Expense Estimator, Map View

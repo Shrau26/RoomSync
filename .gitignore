@@ -1,0 +1,10 @@
+.env
+.env.*
+!.env.example
+flask-api/.env
+flask-api/.env.*
+!flask-api/.env.example
+
+node_modules/
+__pycache__/
+*.py[cod]

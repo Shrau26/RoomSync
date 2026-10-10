@@ -1,0 +1,159 @@
+╔══════════════════════════════════════════════════════════════╗
+║          RoomSync v7 — Setup Guide                           ║
+║  AI Rent Predictor: ALL India Cities (50+, 500+ areas)      ║
+╚══════════════════════════════════════════════════════════════╝
+
+NEW IN v7 (vs v6)
+─────────────────
+AI Rent Predictor now covers ALL major Indian cities:
+  50+ cities across 24 states/UTs
+  500+ locality areas with individual rent multipliers
+  Factors: Metro city bonus, College zone detection,
+           Seasonal admission spike (June-Aug), Floor, Furnishing
+
+Cities added (on top of original 8):
+  Maharashtra : Aurangabad
+  Karnataka   : Mysuru, Mangaluru, Hubli-Dharwad
+  Telangana   : Warangal
+  Tamil Nadu  : Coimbatore, Madurai, Tiruchirappalli, Salem
+  Delhi NCR   : Gurugram, Noida, Faridabad, Ghaziabad
+  Rajasthan   : Jaipur, Jodhpur, Udaipur
+  Gujarat     : Ahmedabad, Surat, Vadodara, Rajkot
+  MP          : Indore, Bhopal
+  West Bengal : Kolkata
+  Andhra      : Visakhapatnam, Vijayawada, Tirupati
+  Kerala      : Kochi, Thiruvananthapuram, Kozhikode
+  Punjab      : Chandigarh, Amritsar, Ludhiana
+  UP          : Lucknow, Kanpur, Varanasi, Agra, Prayagraj
+  Bihar/JH    : Patna, Ranchi
+  Odisha/CG   : Bhubaneswar, Raipur
+  NE          : Guwahati, Imphal, Shillong
+  Others      : Dehradun, Shimla, Panaji (Goa)
+
+No API key required — works completely offline!
+
+─────────────────────────────────────────────
+QUICK START (5 steps)
+─────────────────────────────────────────────
+1. npm install           (in roomsync/ folder)
+2. Edit src/firebase/config.js  → paste your Firebase keys
+3. Apply Firestore rules  (see Step 3 below)
+4. npm run dev            → open http://localhost:5173
+5. (Optional) cd flask-api && python app.py  → for ML matching
+
+─────────────────────────────────────────────
+STEP 2 — Firebase Setup
+─────────────────────────────────────────────
+1. https://console.firebase.google.com → New project → Web app
+2. Copy config and paste in src/firebase/config.js
+3. Authentication → Enable Email/Password sign-in
+4. Firestore → Create database (production mode)
+
+─────────────────────────────────────────────
+STEP 3 — Firestore Security Rules
+─────────────────────────────────────────────
+Firebase Console → Firestore → Rules → paste → Publish:
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    match /rooms/{roomId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null
+        && request.auth.uid == resource.data.owner_id;
+    }
+    match /chats/{chatId} {
+      allow read, write: if request.auth != null;
+      match /messages/{messageId} {
+        allow read, write: if request.auth != null;
+      }
+    }
+    match /visits/{visitId}       { allow read, write: if request.auth != null; }
+    match /referrals/{referralId} { allow read, write: if request.auth != null; }
+    match /reviews/{reviewId}     { allow read, write: if request.auth != null; }
+  }
+}
+
+─────────────────────────────────────────────
+STEP 4 — Flask ML API (Optional)
+─────────────────────────────────────────────
+cd flask-api
+pip install flask flask-cors scikit-learn pandas numpy joblib
+
+# First time — train the model:
+cd data && python generate_dataset.py && cd ..
+python models/train_model.py
+
+# Add Groq key for AI explanations (free at console.groq.com):
+# Edit app.py → GROQ_API_KEY = 'your_key'
+
+python app.py     # runs at http://localhost:5001
+
+─────────────────────────────────────────────
+STEP 5 — Cloudinary (Photo Upload)
+─────────────────────────────────────────────
+1. cloudinary.com → free account → copy Cloud Name
+2. Settings → Upload → Add unsigned preset → name: roomsync_upload
+3. Set CLOUDINARY_CLOUD_NAME in:
+   - src/pages/ProfilePage.jsx
+   - src/pages/AddListingPage.jsx
+
+─────────────────────────────────────────────
+HOW TO TEST: AI Rent Predictor
+─────────────────────────────────────────────
+1. Login → Sidebar → "AI Rent Predictor"
+2. Click city dropdown → scroll by state → select any city
+3. Pick any area, room type, furnishing, floor, year
+4. Click "Predict Fair Rent" → see range + breakdown
+5. Type a quoted rent in "Compare" field → overpay / fair deal alert
+6. Try: Koramangala, Bengaluru, 1BHK, Fully Furnished → see premium
+7. Try: Katraj, Pune, 1RK → see budget-friendly result
+
+SAMPLE OUTPUTS (2025, Semi-Furnished, 1st-2nd floor):
+  Katraj, Pune       1RK  → ~Rs.4,000
+  Hinjewadi, Pune    1BHK → ~Rs.11,500
+  Andheri W, Mumbai  1BHK → ~Rs.30,000
+  Koramangala, BLR   2BHK → ~Rs.44,000
+  Gachibowli, HYD    1RK  → ~Rs.8,500
+  Gomti Nagar, LKO   1BHK → ~Rs.13,500
+  Salt Lake, KOL     1BHK → ~Rs.14,000
+  Edapally, Kochi    1BHK → ~Rs.14,500
+
+─────────────────────────────────────────────
+PORT REFERENCE
+─────────────────────────────────────────────
+Frontend : http://localhost:5173
+Flask API: http://localhost:5001
+Firebase : Cloud (no local port)
+
+─────────────────────────────────────────────
+TROUBLESHOOTING
+─────────────────────────────────────────────
+"Firebase auth/invalid-api-key"
+  → Replace placeholders in src/firebase/config.js
+
+Rent Predictor shows nothing when I open it
+  → Normal! Click "Predict Fair Rent" button to get result
+  → Works 100% offline, no internet or Flask needed
+
+Referral page "No rooms listed"
+  → Add a room via Add Listing first, then come back
+
+Roommate Match shows 0 results
+  → Start Flask: cd flask-api && python app.py
+  → Need 2+ users with complete profiles signed up
+  → No fake data shown (by design, since fake data removed)
+
+Flask pip install fails
+  → pip install flask flask-cors scikit-learn pandas numpy joblib
+
+─────────────────────────────────────────────
+RoomSync v7 | VIT Pune EDI Project
+50+ Cities | 500+ Areas | All India Coverage
+React + Firebase + Python ML
+─────────────────────────────────────────────
