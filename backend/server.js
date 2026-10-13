@@ -232,9 +232,4 @@ app.put(
 );
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`🚀 RoomSync Backend running on http://localhost:${PORT}`);
-  if (!firebaseEnabled) {
-    console.log('   Firebase Admin disabled — frontend works without this backend.');
-  }
-});
+export default app;
